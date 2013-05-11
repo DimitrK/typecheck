@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>typecheck.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="typecheck.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+
+    <ul class="sections">
+
+          <li id="title">
+              <div class="annotation">
+                  <h1>typecheck.js</h1>
+              </div>
+          </li>
+
+
+
+        <li id="section-1">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <pre><code>--
+TypeCheck.js 0.0.1.α
+Copyright (c) 2013 Dimitris Kyriazopoulos, jim.feedback @ gmail.com
+MIT Lincesed
+-
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the &quot;Software&quot;),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+-
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+-
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+--</code></pre>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> TypeCheck = TypeCheck || {options: {custom: {types: {}, plugins: {}}}};
+<span class="keyword">var</span> window = window;
+(<span class="function"><span class="keyword">function</span> <span class="params">(options)</span> {</span>
+    <span class="string">"use strict"</span>;
+
+    <span class="comment">/**
+    * Iterates in each object enumerable property and executes the given function for each of them.
+    * @param {object} object The object which is wanted to expose its properties.
+    * @param {function} iteraction The function which will be executed in each enumerable property found.
+    * @param {object=} context The context the iteraction will be executed in.
+    */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">objectOwnPropertiesIterator</span><span class="params">(object, iteraction, context)</span> {</span>
+        <span class="keyword">var</span> prop;
+        <span class="keyword">for</span> (prop <span class="keyword">in</span> object) {
+            <span class="keyword">if</span> (object.hasOwnProperty(prop)) {
+                iteraction.apply(context, [prop, object[prop]]);
+            }
+        }
+    }
+
+    <span class="comment">/**
+    * Given two objects, makes a shallow copy of any property of the first object to the second in case that doesnt exist in it.
+    * @param {object} source The source object which its properties will be copied.
+    * @param {object} target The target object which will get the missing properties.
+    * @param {boolean=} overwritte Specifies if properties on target object should be overwritten from `source` object in case they exist already.
+    * @param {object=} typeCheckKind If this optional parameter is set then it will be done a deep copy of the `source` object
+    */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">setSamePropertiesFrom</span><span class="params">(source, target, overwritte, typeCheckKind)</span> {</span>
+        target = target || {};</pre></div></div>
+
+        </li>
+
+
+        <li id="section-2">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Iterates though the available source object&#39;s properties and passes them to the defined function.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>        objectOwnPropertiesIterator(source, <span class="function"><span class="keyword">function</span> <span class="params">(propName, propVal)</span> {</span>
+            <span class="keyword">if</span> (typeCheckKind &amp;&amp; typeCheckKind.object(propVal)) {
+                target[propName] = target[propName] || {};
+                setSamePropertiesFrom(propVal, target[propName], overwritte, typeCheckKind);
+            }</pre></div></div>
+
+        </li>
+
+
+        <li id="section-3">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>if target object doesn&#39;t have the property or <code>overwritte</code> is set to true then assign that property.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (overwritte || !target.hasOwnProperty(propName)) {
+                target[propName] = propVal;
+            }
+        });
+        <span class="keyword">return</span> target;
+    }
+
+
+    <span class="comment">/**
+    * Given a `typeCheck` instance of any Kind (`TypeCheckPrime`,`TypeCheckSimpleLengthComparer`) this plugin injects the `many` object as property to that instance which makes it able to handle bulk checks in multiple variables against the same type. Tha variables should be passed as array.
+    * @param {object} typeCheckKind The kind of `typeCheck` instance.
+    */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">includeTheManyPlugin</span><span class="params">(typeCheckKind)</span> {</span></pre></div></div>
+
+        </li>
+
+
+        <li id="section-4">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>If the property is not there set an empty object</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>        typeCheckKind.many = typeCheckKind.many || {};</pre></div></div>
+
+        </li>
+
+
+        <li id="section-5">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Iterates through the given TypeCheck kind&#39;s properties and passes them to the function</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>        objectOwnPropertiesIterator(typeCheckKind, <span class="function"><span class="keyword">function</span> <span class="params">(propKey, propVal)</span> {</span></pre></div></div>
+
+        </li>
+
+
+        <li id="section-6">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>For each of these properties sets another property pre-pluralized, to the <code>many</code> object as a function which takes as argument an array of variables (<code>collection</code>) and an optional <code>length</code></p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            typeCheckKind.many[propKey + <span class="string">'s'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(collection, length)</span> {</span>
+                <span class="keyword">var</span> index;</pre></div></div>
+
+        </li>
+
+
+        <li id="section-7">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Ensures that the collection is array and the property of the TypeCheck Kind is a function in order to avoid to call as functions objects like <code>empty</code>,<code>filled</code> and <code>many</code></p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (typeCheckKind.array(collection) &amp;&amp; typeCheckKind.<span class="keyword">function</span>(typeCheckKind[propKey])) {</pre></div></div>
+
+        </li>
+
+
+        <li id="section-8">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Iterates through all the elements of the array and on each one calls the type check with or without length</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">for</span> (index = <span class="number">0</span>; index &lt; collection.length; index++) {</pre></div></div>
+
+        </li>
+
+
+        <li id="section-9">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>On the first fail of the check for a variable during the iteration return false.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (arguments.length === <span class="number">2</span> &amp;&amp; !typeCheckKind[propKey](collection[index], length)) { <span class="keyword">return</span> <span class="literal">false</span>; }
+                        <span class="keyword">if</span> (arguments.length &lt; <span class="number">2</span> &amp;&amp; !typeCheckKind[propKey](collection[index])) { <span class="keyword">return</span> <span class="literal">false</span>; }
+                    }</pre></div></div>
+
+        </li>
+
+
+        <li id="section-10">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>In other cases return true</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">return</span> <span class="literal">true</span>;
+                }
+            };
+        });
+    }
+
+    <span class="comment">/**
+    * Given a `typeCheck` instance of any Kind (`TypeCheckPrime`,`TypeCheckSimpleLengthComparer`) this plugin injects the `empty` and `filled` objects as properties to that instance which makes it able to handle checks regarding if the var of a given type is having a value or not. Supports check for the following types: `array`, `string`, and `object`.
+    * @param {object} typeCheckKind The kind of `typeCheck` instance.
+    */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">includeTheEmptyFilledPlugins</span><span class="params">(typeCheckKind)</span> {</span>
+        typeCheckKind.empty = typeCheckKind.empty || {};
+        typeCheckKind.filled = typeCheckKind.filled || {};
+        objectOwnPropertiesIterator(typeCheckKind, <span class="function"><span class="keyword">function</span> <span class="params">(propKey, propVal)</span> {</span>
+            <span class="keyword">var</span> emptyCheck;</pre></div></div>
+
+        </li>
+
+
+        <li id="section-11">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>all the functions for the available data types are wrapped in <code>emptyCheck</code></p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            emptyCheck = {
+                <span class="string">'object'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+                    <span class="keyword">var</span> exists = <span class="literal">false</span>;
+                    objectOwnPropertiesIterator(token, <span class="function"><span class="keyword">function</span> <span class="params">(existsKey, existsVal)</span> {</span> exists = <span class="literal">true</span>; });
+                    <span class="keyword">return</span> !exists;
+                },
+                <span class="string">'string'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+                    <span class="keyword">return</span> !token.length;
+                },
+                <span class="string">'array'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+                    <span class="keyword">return</span> !token.length;
+                },
+                <span class="string">'function'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+                    <span class="keyword">return</span> !token.length;
+                }
+            };</pre></div></div>
+
+        </li>
+
+
+        <li id="section-12">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>If there is actually a method in the <code>emmptyCheck</code> object that can handle this key</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (emptyCheck[propKey]) {</pre></div></div>
+
+        </li>
+
+
+        <li id="section-13">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Set a key in the <code>empty</code> property as a function</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                typeCheckKind.empty[propKey] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span></pre></div></div>
+
+        </li>
+
+
+        <li id="section-14">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>That checks the variable against the <code>typeCheck</code> and <code>emptyCheck</code> functions for this key .</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">return</span> typeCheckKind[propKey](token) &amp;&amp; emptyCheck[propKey](token);
+                };</pre></div></div>
+
+        </li>
+
+
+        <li id="section-15">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Set the <code>filled</code> property which is the oposite of <code>empty</code>, sugar.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                typeCheckKind.filled[propKey] = !typeCheckKind.empty[propKey];
+            }
+        });
+    }
+
+    <span class="comment">/**
+    * Given a `typeCheck` instance of any Kind (`TypeCheckPrime`,`TypeCheckSimpleLengthComparer`) this plugin injects any custom defined plugins.
+    * @param {object} typeCheckKind The kind of `typeCheck` instance.
+    * @param {object} plugins The the custom plugins defined in `TypeCheck.options.custom.plugins` object.
+    */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">includeCustomPlugins</span><span class="params">(typeCheckKind, plugins)</span> {</span></pre></div></div>
+
+        </li>
+
+
+        <li id="section-16">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Iterate through the available custom plugins of <code>options.custom.plugins</code> and for each of these:</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>        objectOwnPropertiesIterator(plugins, <span class="function"><span class="keyword">function</span> <span class="params">(pluginName, pluginFn)</span> {</span></pre></div></div>
+
+        </li>
+
+
+        <li id="section-17">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <ul>
+<li>Initialize it if is not initialized</li>
+</ul>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            typeCheckKind[pluginName] = typeCheckKind[pluginName] || {};</pre></div></div>
+
+        </li>
+
+
+        <li id="section-18">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <ul>
+<li>Then Iterate through the properties of the instance of the kind of TypeCheck chosen and</li>
+</ul>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            objectOwnPropertiesIterator(typeCheckKind, <span class="function"><span class="keyword">function</span> <span class="params">(propName, propVal)</span> {</span></pre></div></div>
+
+        </li>
+
+
+        <li id="section-19">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>-if the property is not an object, which means is not another plugin,</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (!typeCheckKind.object(propVal) &amp;&amp; typeCheckKind.<span class="keyword">function</span>(pluginFn)) {</pre></div></div>
+
+        </li>
+
+
+        <li id="section-20">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Assign it as custom plugin and Call the it with parameters the property name, value, and the name of the plugin</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                    typeCheckKind[pluginName][propName] = pluginFn.bind(pluginFn, propName);
+                }
+            });
+        });
+    }
+
+    <span class="comment">/**
+    * Given a `typeCheck` instance of any Kind (`TypeCheckPrime`,`TypeCheckSimpleLengthComparer`) this plugin manages user choices as declared in `TypeCheck.options` object.
+    * @param {object} typeCheckKind The kind of `typeCheck` instance.
+    */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">includeCustomChoices</span><span class="params">(typeCheckKind)</span> {</span>
+        <span class="keyword">var</span> defaults;
+        defaults = {
+            kind: <span class="string">"length"</span>,
+            custom: {</pre></div></div>
+
+        </li>
+
+
+        <li id="section-21">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>The custom type checks object</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                types: {},</pre></div></div>
+
+        </li>
+
+
+        <li id="section-22">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Declaration of custom plugins which will be injected in the TypeCheck object.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                plugins: {}
+            },</pre></div></div>
+
+        </li>
+
+
+        <li id="section-23">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Declaration of plugins should be included. Gets an object with names of the available plugins as keys and a boolean which defines if a plugin should be included or not as value : <code>many</code>,<code>filled</code>,<code>empty</code></p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            plugins: {
+                many: <span class="literal">true</span>,
+                empty: <span class="literal">true</span> <span class="comment">// `filled` plugin is going in pair with empty so modification to one affects both.</span>
+            },</pre></div></div>
+
+        </li>
+
+
+        <li id="section-24">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>If set to true user can overwritte existing type checks with custom.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            overwritte: <span class="literal">false</span>
+        };</pre></div></div>
+
+        </li>
+
+
+        <li id="section-25">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>Mixing options with defaults and return the result to options instead of supporting deep copy.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>        setSamePropertiesFrom(defaults, options, <span class="literal">false</span>, typeCheckKind);</pre></div></div>
+
+        </li>
+
+
+        <li id="section-26">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>Setting custom types checks</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>        setSamePropertiesFrom(options.custom.types, typeCheckKind, options.overwritte);</pre></div></div>
+
+        </li>
+
+
+        <li id="section-27">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Setting custom plugins</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>        includeCustomPlugins(typeCheckKind, options.custom.plugins);
+    }</pre></div></div>
+
+        </li>
+
+
+        <li id="section-28">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>The core TypeCheck Kind. Handles the basic checks against every javascript type</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">TypeCheckPrime</span><span class="params">()</span> {</span>
+        <span class="keyword">var</span> typeCheck;
+        typeCheck = <span class="keyword">this</span>;
+        <span class="keyword">this</span>[<span class="string">'function'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+            <span class="keyword">return</span> token <span class="keyword">instanceof</span> Function;
+        };
+        <span class="keyword">this</span>[<span class="string">'object'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+            <span class="keyword">return</span> Object.prototype.toString.call(token) === <span class="string">'[object Object]'</span>;
+        };
+        <span class="keyword">this</span>[<span class="string">'array'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+            <span class="keyword">return</span> token &amp;&amp; !typeCheck.<span class="literal">null</span>(token.length) &amp;&amp; token.push === Array.prototype.push;
+        };
+        <span class="keyword">this</span>[<span class="string">'number'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span></pre></div></div>
+
+        </li>
+
+
+        <li id="section-29">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Even if a bit slower I prefer to check numbers with parseFloat because empty array return NaN, The second check is used for digit zero and lastly Infinity check</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> parseFloat(token) + <span class="number">1</span> &amp;&amp; (+token === <span class="number">0</span> || !!(+token / +token));
+        };
+        <span class="keyword">this</span>[<span class="string">'numeric'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+            <span class="keyword">return</span> <span class="keyword">typeof</span> token === <span class="string">'number'</span>;
+        };
+        <span class="keyword">this</span>[<span class="string">'string'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+            <span class="keyword">return</span> !typeCheck.<span class="literal">null</span>(token) &amp;&amp; !!token.toLowerCase;
+        };
+        <span class="keyword">this</span>[<span class="string">'any'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token, types)</span> {</span>
+            <span class="keyword">var</span> index;
+            types = typeCheck.array(types) ? types : typeCheck.string(types) ? types.split(<span class="string">" "</span>) : [];
+            <span class="keyword">for</span> (index <span class="keyword">in</span> types) {</pre></div></div>
+
+        </li>
+
+
+        <li id="section-30">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>There is a property set in the array and it exists a typeCheck method for the value of the types array&#39;s index</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (types.hasOwnProperty(index) &amp;&amp; typeCheck[types[index]]) {</pre></div></div>
+
+        </li>
+
+
+        <li id="section-31">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>If the value of the token satisfies the typeCheck method for first time return true</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">if</span> (typeCheck[types[index]](token)) {</pre></div></div>
+
+        </li>
+
+
+        <li id="section-32">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>In case of undefined applies the first check t, in other cases the second</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">return</span> typeCheck[types[index]](token) || !!token;
+                    }
+                }
+            }</pre></div></div>
+
+        </li>
+
+
+        <li id="section-33">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>In any other cases just make sure the token is not null</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> !token;
+        };
+        <span class="keyword">this</span>[<span class="string">'undefined'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+            <span class="keyword">return</span> token === <span class="literal">null</span> || token === <span class="literal">undefined</span>;
+        };
+        <span class="keyword">this</span>[<span class="string">'null'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+            <span class="keyword">return</span> typeCheck.<span class="literal">undefined</span>(token);
+        };
+        <span class="keyword">this</span>[<span class="string">'infinity'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token)</span> {</span>
+            <span class="keyword">return</span> +token / <span class="number">0</span> === token &amp;&amp; !(+token / +token);
+        };</pre></div></div>
+
+        </li>
+
+
+        <li id="section-34">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Integrating custom types.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>        setSamePropertiesFrom(options.custom.types, <span class="keyword">this</span>, options.overwritte);
+        <span class="keyword">return</span> <span class="keyword">this</span>;
+    }</pre></div></div>
+
+        </li>
+
+
+        <li id="section-35">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>This TypeCheck Kind handles validation of variables of certain types between their length or value against a given length or a wanted number. Supports : <code>array</code>, <code>string</code>, <code>number</code> types.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">TypeCheckSimpleLengthComparer</span><span class="params">()</span> {</span>
+        <span class="keyword">var</span> typeCheckPrime, numericComparator;
+        typeCheckPrime = <span class="keyword">new</span> TypeCheckPrime();
+        numericComparator = {
+            <span class="string">'compare'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(leftNumber, rightConditional)</span> {</span>
+                <span class="keyword">var</span> condition;
+                <span class="keyword">if</span> (typeCheckPrime.<span class="literal">undefined</span>(rightConditional)) {
+                    <span class="keyword">return</span> <span class="literal">false</span>;
+                }
+                rightConditional = rightConditional.toString(); <span class="comment">//make sure is a string before replace anything</span>
+                condition = rightConditional.replace(<span class="regexp">/(\d|\-|\+|\.|e)/g</span>, <span class="string">''</span>) || <span class="string">'='</span>; <span class="comment">// match digits, negatives, positives and decimals</span>
+                <span class="keyword">return</span> <span class="keyword">this</span>[condition] &amp;&amp; <span class="keyword">this</span>[condition](leftNumber, rightConditional.replace(condition, <span class="string">''</span>));
+
+            },
+            <span class="string">'&gt;'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(leftNumber, rightNumber)</span> {</span> <span class="keyword">return</span> +leftNumber &gt; +rightNumber; },
+            <span class="string">'&lt;'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(leftNumber, rightNumber)</span> {</span> <span class="keyword">return</span> +leftNumber &lt; +rightNumber; },
+            <span class="string">'='</span>: <span class="function"><span class="keyword">function</span> <span class="params">(leftNumber, rightNumber)</span> {</span> <span class="keyword">return</span> +leftNumber === +rightNumber; },
+            <span class="string">'!'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(leftNumber, rightNumber)</span> {</span> <span class="keyword">return</span> +leftNumber !== +rightNumber; },
+            <span class="string">'&gt;='</span>: <span class="function"><span class="keyword">function</span> <span class="params">(leftNumber, rightNumber)</span> {</span> <span class="keyword">return</span> +leftNumber &gt;= +rightNumber; },
+            <span class="string">'&lt;='</span>: <span class="function"><span class="keyword">function</span> <span class="params">(leftNumber, rightNumber)</span> {</span> <span class="keyword">return</span> +leftNumber &lt;= +rightNumber; }
+        };
+
+        <span class="keyword">this</span>[<span class="string">'array'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token, length)</span> {</span>
+            <span class="keyword">return</span> typeCheckPrime.array(token) &amp;&amp; (arguments.length &lt; <span class="number">2</span> ||  numericComparator.compare(token.length, length));
+        };
+        <span class="keyword">this</span>[<span class="string">'string'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token, length)</span> {</span>
+            <span class="keyword">return</span> typeCheckPrime.string(token) &amp;&amp; (arguments.length &lt; <span class="number">2</span>  || numericComparator.compare(token.length, length));
+        };
+        <span class="keyword">this</span>[<span class="string">'number'</span>] = <span class="function"><span class="keyword">function</span> <span class="params">(token, wanted)</span> {</span>
+            <span class="keyword">return</span> typeCheckPrime.number(token) &amp;&amp; (arguments.length &lt; <span class="number">2</span>  || numericComparator.compare(token, wanted));
+        };
+        setSamePropertiesFrom(typeCheckPrime, <span class="keyword">this</span>);
+        <span class="keyword">return</span> <span class="keyword">this</span>;
+    }</pre></div></div>
+
+        </li>
+
+
+        <li id="section-36">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>Checks the options for the corresponding <code>TypeCheck</code> kind</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>    window.TypeCheck = (options &amp;&amp; options.kind === <span class="string">"basic"</span>) ? <span class="keyword">new</span> TypeCheckPrime() : <span class="keyword">new</span> TypeCheckSimpleLengthComparer();</pre></div></div>
+
+        </li>
+
+
+        <li id="section-37">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>Is good first to include the custom choices since this will allow the custom types to be extended by other plugins.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>    includeCustomChoices(window.TypeCheck);</pre></div></div>
+
+        </li>
+
+
+        <li id="section-38">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>Later the rest of the plugins.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>    includeTheEmptyFilledPlugins(window.TypeCheck);
+    includeTheManyPlugin(window.TypeCheck);
+
+    <span class="keyword">return</span> window.TypeCheck;
+})(TypeCheck.options);</pre></div></div>
+
+        </li>
+
+
+        <li id="section-39">
+            <div class="annotation">
+
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <h2>Customization</h2>
+<p>In case there is a need of custom plugins or custom types there is the way to inject them.
+Before you include the library to your code create an object named <code>TypeCheck</code> and later declare a property <code>options</code> :</p>
+<pre><code> var TypeCheck = TypeCheck || {options: {}};</code></pre>
+<p>Now you can adjust the library to your needs. The available options are :</p>
+<ul>
+<li><p><code>TypeCheck.options.kind</code> Which takes a string. Possible values are  <code>&quot;basic&quot;</code> or <code>&quot;length&quot;</code> and specifies which Kind of TypeCheck to use. In case of <code>basic</code>, TypeCheck is limited only on checking types while <code>length</code> TypeCheck compares the input against types and length whenever it is supported.</p>
+</li>
+<li><p><code>TypeCheck.options.custom.types</code> Which allows you to declare custom types which then will be reusable through the library.</p>
+<p>   TypeCheck.options.custom.types.binary = function (atom) {</p>
+<pre><code>   &quot;use strict&quot;;
+   return atom === 0 || atom === 1;</code></pre>
+<p>   };</p>
+</li>
+<li><p><code>TypeCheck.options.custom.plugins</code> Which allows you to declare custom plugins which are able to filter and process all the available types that TypeCheck currently checks. The first parameter of each custom plugin function will always be the names of each declared type and will be set automatically. During call of the plugin this argument should not be included, it is there to assist you on declaring different handlers for different types.</p>
+<p>   TypeCheck.options.custom.plugins.lessthan = function (typeName, atom, maximum){</p>
+<pre><code>  &quot;use strict&quot;;
+  this[&#39;number&#39;] = function() { return +atom &lt;= +maximum };
+  this[&#39;array&#39;] = function() { return atom.length &lt;= +maximum };
+  this[&#39;string&#39;] = function() { return atom.length &lt;= +maximum };
+  return TypeCheck[typeName] &amp;&amp; TypeCheck[typeName](atom) &amp;&amp; this[typeName]();</code></pre>
+<p>   };</p>
+</li>
+</ul>
+<p>When <code>lessthan</code> plugin will be called will only accept as arguments any decalred argument except the first one. e.g. <code>TypeCheck.lessthan.string(&quot;length&quot;,7)</code></p>
+<ul>
+<li><code>TypeCheck.options.overwrittte</code> Accepts <code>true</code> or <code>false</code> and allows the user to overwritte existing plugins and type checking functions with custom ones</li>
+</ul>
+
+            </div>
+
+        </li>
+
+    </ul>
+  </div>
+</body>
+</html>
