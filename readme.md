@@ -16,7 +16,7 @@
  >* functions
  >* objects
 
- ####Use
+####Use
 
 > In order to use typecheck include it on the head or body part of the html in a ```script``` tag once. Make sure to be included before a reference to code that needs it. You can use it to:
 
