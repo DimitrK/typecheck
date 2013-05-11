@@ -1,6 +1,6 @@
 //     --
 //     TypeCheck.js 0.0.1.α
-//     Copyright (c) 2013 Dimitris Kyriazopoulos, http://www.dimitrisk.info
+//     Copyright (c) 2013 Dimitris Kyriazopoulos, jim.feedback @ gmail.com
 //     MIT Lincesed
 //     -
 //     Permission is hereby granted, free of charge, to any person obtaining
@@ -182,9 +182,7 @@ var window = window;
         includeCustomPlugins(typeCheckKind, options.custom.plugins);
     }
 
-    /**
-    * The core TypeCheck Kind. Handles the basic checks against every javascript type
-    */
+    //The core TypeCheck Kind. Handles the basic checks against every javascript type
     function TypeCheckPrime() {
         var typeCheck;
         typeCheck = this;
@@ -237,9 +235,7 @@ var window = window;
         return this;
     }
 
-    /**
-    * This TypeCheck Kind handles validation of variables of certain types between their length or value against a given length or a wanted number. Supports : `array`, `string`, `number` types.
-    */
+    // This TypeCheck Kind handles validation of variables of certain types between their length or value against a given length or a wanted number. Supports : `array`, `string`, `number` types.
     function TypeCheckSimpleLengthComparer() {
         var typeCheckPrime, numericComparator;
         typeCheckPrime = new TypeCheckPrime();
@@ -263,13 +259,20 @@ var window = window;
         };
 
         this['array'] = function (token, length) {
-            return typeCheckPrime.array(token) && (arguments.length < 2 ||  numericComparator.compare(token.length, length));
+            return typeCheckPrime.array(token) &&
+                (arguments.length < 2 ||  numericComparator.compare(token.length, length));
         };
         this['string'] = function (token, length) {
-            return typeCheckPrime.string(token) && (arguments.length < 2  || numericComparator.compare(token.length, length));
+            return typeCheckPrime.string(token) &&
+                (arguments.length < 2  || numericComparator.compare(token.length, length));
         };
         this['number'] = function (token, wanted) {
-            return typeCheckPrime.number(token) && (arguments.length < 2  || numericComparator.compare(token, wanted));
+            return typeCheckPrime.number(token) &&
+                (arguments.length < 2  || numericComparator.compare(token, wanted));
+        };
+        this['numeric'] = function (token, wanted) {
+            return typeCheckPrime.numeric(token) &&
+                (arguments.length < 2  || numericComparator.compare(token, wanted));
         };
         setSamePropertiesFrom(typeCheckPrime, this);
         return this;
