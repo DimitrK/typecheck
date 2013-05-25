@@ -304,13 +304,16 @@ var window = window;
 //
 // * `TypeCheck.options.custom.types` Which allows you to declare custom types which then will be reusable through the library.
 //
+//      ```
 //      TypeCheck.options.custom.types.binary = function (atom) {
 //          "use strict";
 //          return atom === 0 || atom === 1;
 //      };
+//      ```
 //
 // * `TypeCheck.options.custom.plugins` Which allows you to declare custom plugins which are able to filter and process all the available types that TypeCheck currently checks. The first parameter of each custom plugin function will always be the names of each declared type and will be set automatically. During call of the plugin this argument should not be included, it is there to assist you on declaring different handlers for different types.
 //
+//      ```
 //      TypeCheck.options.custom.plugins.lessthan = function (typeName, atom, maximum){
 //         "use strict";
 //         this['number'] = function() { return +atom <= +maximum };
@@ -318,6 +321,7 @@ var window = window;
 //         this['string'] = function() { return atom.length <= +maximum };
 //         return TypeCheck[typeName] && TypeCheck[typeName](atom) && this[typeName]();
 //      };
+//      ```
 //
 // When `lessthan` plugin will be called will only accept as arguments any decalred argument except the first one. e.g. `TypeCheck.lessthan.string("length",7)`
 //

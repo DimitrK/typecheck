@@ -481,19 +481,19 @@ describe("TypeCheck", function () {
             expect(TypeCheck.many.objects(manyobjects)).toBeTruthy();
         });
         describe("is expected to be invalid in case it", function () {
-            it("is passed a group[] of mixed elements objects with arrays instead of length", function () {
+            it("is passed a group[] of mixed elements objects with arrays", function () {
                 var manyMixed = [arrayUnit, arrayUnit, arrayUnit];
                 expect(TypeCheck.many.objects(manyMixed)).toBeFalsy();
             });
-            it("is passed a group[] of mixed elements objects with undefined instead of length", function () {
+            it("is passed a group[] of mixed elements objects with undefined", function () {
                 var manyMixed = [objectUnit, objectUnit, undefinedUnit];
                 expect(TypeCheck.many.objects(manyMixed)).toBeFalsy();
             });
-            it("is passed a group[] of mixed elements objects with numbers instead of length", function () {
+            it("is passed a group[] of mixed elements objects with numbers", function () {
                 var manyMixed = [numericUnit, objectUnit, numericUnit];
                 expect(TypeCheck.many.objects(manyMixed)).toBeFalsy();
             });
-            it("is passed a group[] of mixed elements objects with strings instead of length", function () {
+            it("is passed a group[] of mixed elements objects with strings", function () {
                 var manyMixed = [stringUnit, stringUnit, stringUnit];
                 expect(TypeCheck.many.objects(manyMixed)).toBeFalsy();
             });
@@ -501,7 +501,7 @@ describe("TypeCheck", function () {
 
         describe("and it doesn't validates their length in any case such as ", function () {
             describe("as valid in case it", function () {
-                it("is passed a group[] of empty objects for length 1", function () {
+                it("is passed a group[] of empty objects for length 1 (Not supported)", function () {
                     var manyobjects = [objectEmpty, objectEmpty, objectEmpty];
                     expect(TypeCheck.many.objects(manyobjects,1)).toBeTruthy();
                 });
@@ -509,15 +509,15 @@ describe("TypeCheck", function () {
                     var manyobjects = [objectUnit, objectUnit, objectUnit];
                     expect(TypeCheck.many.objects(manyobjects,0)).toBeTruthy();
                 });
-                it("is passed a group[] of single element objects for length a text object", function () {
+                it("is passed a group[] of single element objects for length a text object (Not supported)", function () {
                     var manyobjects = [objectUnit ,objectUnit, objectUnit];
                     expect(TypeCheck.many.objects(manyobjects,objectUnit)).toBeTruthy();
                 });
-                it("is passed a group[] of single element objects for negative length -1", function () {
+                it("is passed a group[] of single element objects for negative length -1 (Not supported)", function () {
                     var manyobjects = [objectUnit ,objectUnit, objectUnit];
                     expect(TypeCheck.many.objects(manyobjects,-1)).toBeTruthy();
                 });
-                it("is passed a group[] of single element objects for undefined length", function () {
+                it("is passed a group[] of single element objects for undefined length (Not supported)", function () {
                     var manyobjects = [objectUnit ,objectUnit, objectUnit];
                     expect(TypeCheck.many.objects(manyobjects, undefined)).toBeTruthy();
                 });
